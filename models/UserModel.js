@@ -26,6 +26,12 @@ const userSchema = new mongoose.Schema({
     required: true
   },
 
+  isActive: {        // لمعرفة إذا الحساب مفعل
+    type: Boolean,
+    default: false
+  },
+
+   activationToken: String, 
 
   createdAt: {
     type: Date,
@@ -33,6 +39,11 @@ const userSchema = new mongoose.Schema({
   }
 });
 
+userSchema.methods.createActivationToken = function () {
+  const token = crypto.randomBytes(32).toString('hex');
+  this.activationToken = token;
+  return token;
+};
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;
