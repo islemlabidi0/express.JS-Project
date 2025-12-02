@@ -8,6 +8,11 @@ const authRoutes = require('./routes/authRoutes');
 const app = express();
 const PORT = process.env.PORT || 7000;
 
+
+
+
+app.use('/api', userRoute)
+// start server
 // Middleware to parse JSON
 app.use(express.json());
 
