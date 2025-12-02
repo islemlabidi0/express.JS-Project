@@ -1,8 +1,6 @@
 const User = require('../models/userModel');
 const bcrypt = require('bcrypt');
 
-
-
 //login
 const jwt = require('jsonwebtoken');  
 
@@ -44,4 +42,5 @@ exports.login = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
+
 };
