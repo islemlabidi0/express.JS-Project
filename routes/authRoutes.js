@@ -9,6 +9,7 @@ const User = require('../models/userModel');
 
 router.post('/register', authController.register);
 
+
 router.get('/activate/:token', async (req, res) => {
   const { token } = req.params;
   const user = await User.findOne({ activationToken: token });
@@ -23,7 +24,7 @@ router.get('/activate/:token', async (req, res) => {
 
   res.status(200).json({ message: "Account activated successfully" });
 });
-
+router.post('/login', authController.login);
 
 
 module.exports = router;
