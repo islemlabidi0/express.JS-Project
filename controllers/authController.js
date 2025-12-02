@@ -7,13 +7,13 @@ exports.register = async (req, res) => {
   try {
     const { name, login, password, role } = req.body;
 
-     // 🔹 Vérification des champs
+     //  nthabet itha champs el kol maktoubin
     if (!name || !login || !password || !role) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
 
-    // 🔹 Vérification de l'email
+    // nthabet fel l'email
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 if (!login || !emailRegex.test(login)) {
   return res.status(400).json({ message: "Invalid or missing email address" });
@@ -21,7 +21,7 @@ if (!login || !emailRegex.test(login)) {
 
 
 
-     // 🔹 Vérification du mot de passe
+     // nthabet fel mot de passe
     if (password.length < 6) {
       return res.status(400).json({ message: "Password must be at least 6 characters" });
     }
@@ -33,7 +33,7 @@ if (!login || !emailRegex.test(login)) {
 
 
 
-    // 🔹 Vérifier si le login existe déjà
+    // nthabet si login existe déjà
     const existing = await User.findOne({ login });
     if (existing) {
       return res.status(400).json({ message: "Login already used" });
@@ -48,11 +48,11 @@ if (!login || !emailRegex.test(login)) {
       role
     });
 
-    // 🔥 إنشاء رمز التفعيل
+    // naamel token ta3 activation
     const activationToken = user.createActivationToken();
     await user.save();
 
-    // 🔥 إعداد SMTP لإرسال الإيميل
+  // nabaathou email ta3 activation
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -61,7 +61,7 @@ if (!login || !emailRegex.test(login)) {
       }
     });
 
-    // 🔥 رابط التفعيل
+    // nhebbou naamelou lien ykoun fih token ta3 activation
     const activationURL = `http://localhost:${process.env.PORT}/api/auth/activate/${activationToken}`;
 
     await transporter.sendMail({
