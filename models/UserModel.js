@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const crypto = require('crypto');
+
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -26,12 +28,22 @@ const userSchema = new mongoose.Schema({
     required: true
   },
 
+ 
+isActive: { type: Boolean, default: false },
+
+  activationToken: String,
 
   createdAt: {
     type: Date,
     default: Date.now
   }
 });
+
+userSchema.methods.createActivationToken = function () {
+  const token = crypto.randomBytes(32).toString('hex');
+  this.activationToken = token;
+  return token;
+};
 
 const User = mongoose.model('User', userSchema);
 
