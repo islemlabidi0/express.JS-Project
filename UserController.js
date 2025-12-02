@@ -102,4 +102,16 @@ const deleteUser = async(req, res)=>{
         res.status(500).json({error: error.message});
     }
 }
-module.exports = { createUser, updateUser , deleteUser};
+
+//get all users
+const getAllUsers = async (req,res) =>{
+    try{
+        //njibou les infos mta3 les users lkol ken password
+        const users = await User.find().select("-password");
+
+        res.status(200).json(users);
+    }catch(error){
+        res.status(500).json({error: error.message});
+    }
+}
+module.exports = { createUser, updateUser , deleteUser, getAllUsers};
