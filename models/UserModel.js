@@ -28,6 +28,7 @@ const userSchema = new mongoose.Schema({
     required: true
   },
 
+ 
 isActive: { type: Boolean, default: false },
 
   activationToken: String,
