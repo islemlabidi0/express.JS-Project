@@ -1,5 +1,9 @@
+const express = require('express');
+const app = express();
+
+app.use(express.json());
 const bcrypt = require('bcryptjs');
-const User = require('./models/UserModel.js');
+const User = require('./models/UserModel');
 
 const validateUser = (req, res, next) => {
   const { name, login, password, role } = req.body;
