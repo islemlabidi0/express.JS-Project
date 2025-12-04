@@ -114,4 +114,36 @@ const getAllUsers = async (req,res) =>{
         res.status(500).json({error: error.message});
     }
 }
-module.exports = { createUser, updateUser , deleteUser, getAllUsers};
+// USER : les fonctions lel user bch ykoun 3andou accès l profil mte3ou bark
+
+// Get own profile
+//req.user._id jey men middleware JWT
+//Nna7iw el password
+//naatiweh el profile mte3ou
+const getMyProfile = async (req, res) => {
+  const user = await User.findById(req.user._id).select('-password');
+  res.json(user);
+};
+
+// Update own profile
+//nekhet les champs eli bch ybadelhoum
+
+
+const updateMyProfile = async (req, res) => {
+  const updates = req.body;
+  //ken bdel l password n3mlouh hashed
+  if (updates.password) {
+    updates.password = await bcrypt.hash(updates.password, 10);
+  }
+  //naatiweh el profile mte3ou el jdid
+  const user = await User.findByIdAndUpdate(req.user._id, updates, { new: true }).select('-password');
+  res.json(user);
+};
+
+// Delete own account
+const deleteMyAccount = async (req, res) => {
+  await User.findByIdAndDelete(req.user._id);
+  res.json({ message: 'Account deleted successfully' });
+};
+
+module.exports = { createUser, updateUser , deleteUser, getAllUsers , getMyProfile, updateMyProfile, deleteMyAccount };

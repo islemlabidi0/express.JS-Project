@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 7000;
 app.use(express.json());
 
 
-app.use('/api', userRoute)
+app.use('/api/users', userRoute)
 // start server
 
 
