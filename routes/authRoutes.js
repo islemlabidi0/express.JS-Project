@@ -1,30 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const authController = require('../controllers/authController');
-const User = require('../models/UserModel');
+const authCtrl = require('../controllers/AuthentController');
+const validateUser = require('../middlewares/validateUser');
 
-router.post('/login', authController.login);
-
-
-
-router.post('/register', authController.register);
-
-
-router.get('/activate/:token', async (req, res) => {
-  const { token } = req.params;
-  const user = await User.findOne({ activationToken: token });
-
-  if (!user) {
-    return res.status(400).json({ message: "Invalid activation token" });
-  }
-
-  user.isActive = true;
-  user.activationToken = undefined;
-  await user.save();
-
-  res.status(200).json({ message: "Account activated successfully" });
-});
-
-
+router.post('/register', validateUser, authCtrl.register);
+router.post('/login', authCtrl.login);
+router.get('/activate/:token', authCtrl.activate);
 
 module.exports = router;
