@@ -203,4 +203,33 @@ const UpdateTask = async (req,res) => {
         res.status(500).json({message: error.message});
     }
 }
-module.exports = { getTasksByProject , createTask, UpdateTask};
+
+const deleteTask = async (req,res) => {
+    try{
+        const { id } = req.params;
+
+        //nlawjoud 3ala task
+        const task = await Tache.findById(id);
+        if(!task){
+            return res.status(404).json({message: "Task not found"});
+        }
+        const project = await Project.findById(task.projetAssocie);
+        
+        //only manager can delete task
+        if(req.user.role !== "manager"){
+            return res.status(403).json({message: "Access denied : you cannot delete this task"});
+        }
+        //nfas5ou task ml DB
+        await task.deleteOne();
+
+        res.status(200).json({message: "Task deleted successfully"});
+
+
+    }catch(error){
+        if(error.kind === "ObjectId"){
+            return res.status(400).json({message: "Invalid ID format"});
+        }
+        res.status(500).json({message: error.message});
+    }
+}
+module.exports = { getTasksByProject , createTask, UpdateTask, deleteTask};
