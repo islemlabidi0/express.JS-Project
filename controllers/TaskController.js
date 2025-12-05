@@ -55,7 +55,7 @@ const getTasksByProject = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
+//create task 
 const createTask = async(req,res) => {
     try{
         const{titre, description , deadline , projetAssocie , utilisateurAssigné} = req.body;
@@ -138,4 +138,69 @@ const createTask = async(req,res) => {
         res.status(500).json({ message: error.message });
     }
 }
-module.exports = { getTasksByProject , createTask};
+
+//update task 
+const UpdateTask = async (req,res) => {
+    try{
+        const { id} = req.params;
+        const {statut, deadline, utilisateurAssigné} = req.body;
+
+        //nlawjou 3al task fl BD 
+        const task = await Tache.findById(id);
+        if(!task){
+            return res.status(404).json({message: "Task not found"});
+        }
+        const project = await Project.findById(task.projetAssocie);
+        //ken l manager , user eli 3ml l project w user assigné ynjmou yupdatiw
+        if(req.user.role !== "manager" && project.proprietaire.toString() !== req.user.id &&
+        (!task.utilisateurAssigné || task.utilisateurAssigné.toString() !== req.user.id)){
+            return res.status(403).json({message: "Access denied : you cannot update this task"});
+        }
+        //ken l manager ynjm updati l user aasigné
+        if(utilisateurAssigné){
+            if(req.user.role !== "manager"){
+                return res.status(403).json({message: "Only a manager can assign a user to a task"});
+            }
+            //netaakdou ken l user assigné mawjoud fl DB 
+            const user = await User.findById(utilisateurAssigné);
+            if(!user){
+                return res.status(404).json({message: "Assigned user not found"});
+            }
+            task.utilisateurAssigné = utilisateurAssigné;
+        }
+        //update deadline
+        if(deadline){
+            //deadline validation : lezm ykoun >=today
+            const today = new Date();
+            const deadlineDate = new Date(deadline);
+
+            if(isNaN(deadlineDate.getTime())){
+                return res.status(400).json({message: "Invalid deadline format"});
+            }
+            if(deadlineDate < today){
+                return res.status(400).json({message: "Deadline cannot be in the past"});
+            }
+            task.deadline = deadlineDate;
+        }
+        // Update statut: anyone can update
+        if (statut) {
+            const validStatus = ['todo', 'doing', 'done'];
+            if (!validStatus.includes(statut)) {
+                return res.status(400).json({ message: `Statut must be one of: ${validStatus.join(', ')}` });
+            }
+            task.statut = statut;
+        }
+        await task.save();
+
+        res.status(200).json({
+            message: "Task updated successfully",
+            task
+        });
+    }catch(error){
+        if(error.kind === "ObjectId"){
+            return res.status(400).json({message: "Invalid ID format"});
+        }
+        res.status(500).json({message: error.message});
+    }
+}
+module.exports = { getTasksByProject , createTask, UpdateTask};
