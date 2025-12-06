@@ -313,4 +313,71 @@ const SortTasks = async (req, res) => {
   }
 };
 
-module.exports = { getTasksByProject , createTask, UpdateTask, deleteTask, GetTaskById, SortTasks};
+const SearchTasks = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const role = req.user.role;
+    const { q } = req.query;
+
+    if (!q) {
+      return res.status(400).json({ message: "Search query 'q' is required" });
+    }
+
+    // nlawjou f titre , description , statut
+    const searchConditions = {
+      $or: [
+        { titre: { $regex: q, $options: "i" } },
+        { description: { $regex: q, $options: "i" } },
+        { statut: { $regex: q, $options: "i" } }
+      ]
+    };
+
+    let finalFilter = { ...searchConditions };
+
+    // manager ynjm ylawej f ayy project
+    if (role === "manager") {
+      const tasks = await Tache.find(finalFilter)
+        .populate("utilisateurAssigné", "name")
+        .populate("projetAssocie", "projectName");
+
+      if (tasks.length === 0) {
+        return res.status(404).json({ message: "No tasks found" });
+      }
+
+      return res.status(200).json(tasks);
+    }
+
+    // project owner , ken f les projects eli how propriétaire fihom
+    const ownerProjects = await Project.find({ proprietaire: userId }).select("_id");
+    const ownerProjectIds = ownerProjects.map(p => p._id);
+
+    //UTILISATEUR ASSIGNÉ ylawej ken f tasks mt3ou
+    finalFilter = {
+      $and: [
+        searchConditions,
+        {
+          $or: [
+            { utilisateurAssigné: userId },
+            { projetAssocie: { $in: ownerProjectIds } }
+          ]
+        }
+      ]
+    };
+
+    const tasks = await Tache.find(finalFilter)
+      .populate("utilisateurAssigné", "name")
+      .populate("projetAssocie", "projectName");
+
+    if (tasks.length === 0) {
+      return res.status(404).json({ message: "No tasks found" });
+    }
+
+    return res.status(200).json(tasks);
+
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+
+module.exports = { getTasksByProject , createTask, UpdateTask, deleteTask, GetTaskById, SortTasks, SearchTasks};
