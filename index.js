@@ -5,6 +5,7 @@ const express = require('express');
 const connectDB = require('./connection');
 const authRoutes = require('./routes/authRoutes');
 const userRoute = require('./routes/UserRoute');
+const projectRoutes = require('./routes/projectRoutes');
 const TasksRoute = require('./routes/TaskRoute');
 
 const app = express();
@@ -21,6 +22,8 @@ app.use('/api/users', userRoute)
 // Use auth routes
 app.use('/api/auth', authRoutes);
 
+// houni naayt 3la project routes
+app.use('/api/projects', projectRoutes);
 //use tasks routes
 app.use('/api/tasks', TasksRoute);
 
