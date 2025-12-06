@@ -260,4 +260,57 @@ const GetTaskById = async (req,res) => {
         res.status(500).json({message: error.message});
     }
 }
-module.exports = { getTasksByProject , createTask, UpdateTask, deleteTask, GetTaskById};
+
+// SORT TASKS
+const SortTasks = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const role = req.user.role;
+    const { sort } = req.query;
+
+    // Sorting option
+    let sortOption = {};
+    if (sort) {
+      sortOption[sort.replace("-", "")] = sort.startsWith("-") ? -1 : 1;
+    }
+
+    //MANAGER ynjm y3ml sort ll tasks lkol
+    if (role === "manager") {
+      const tasks = await Tache.find().sort(sortOption)
+        .populate("utilisateurAssigné", "name")
+        .populate("projetAssocie", "projectName");
+
+         if (tasks.length === 0) {
+        return res.status(200).json({ message: "No tasks found" });
+      }
+
+      return res.status(200).json(tasks);
+    }
+
+    // PROJECT OWNER ynjm y3ml sort ken l tasks eli howa propriétaire fl project 
+    const ownerProjects = await Project.find({ proprietaire: userId }).select("_id");
+    const ownerProjectIds = ownerProjects.map(p => p._id);
+
+    // UTILISATEUR ASSIGNÉ y3ml sort ken l tasks mt3ou
+    const tasks = await Tache.find({
+      $or: [
+        { utilisateurAssigné: userId },      // tasks assigned to the user
+        { projetAssocie: { $in: ownerProjectIds } } // tasks of his owned projects
+      ]
+    })
+      .sort(sortOption)
+      .populate("utilisateurAssigné", "name")
+      .populate("projetAssocie", "projectName");
+
+    if (tasks.length === 0) {
+        return res.status(200).json({ message: "No tasks found" });
+    }
+
+    return res.status(200).json(tasks);
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { getTasksByProject , createTask, UpdateTask, deleteTask, GetTaskById, SortTasks};

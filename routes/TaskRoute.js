@@ -6,10 +6,13 @@ const { createTask } = require('../controllers/TaskController');
 const { UpdateTask } = require('../controllers/TaskController');
 const { deleteTask } = require('../controllers/TaskController');
 const { GetTaskById } = require('../controllers/TaskController');
+const { SortTasks } = require('../controllers/TaskController');
 
-router.get('/:projectID', authMiddleware, getTasksByProject);
+
 router.post('/create', authMiddleware, createTask);
 router.put('/update/:id', authMiddleware, UpdateTask);
 router.delete('/delete/:id', authMiddleware, deleteTask);
 router.get('/task/:id', authMiddleware, GetTaskById);
+router.get('/sort', authMiddleware, SortTasks);
+router.get('/:projectID', authMiddleware, getTasksByProject);
 module.exports = router;
