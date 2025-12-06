@@ -27,7 +27,7 @@ const tacheSchema = new mongoose.Schema({
     utilisateurAssigné: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User', //reference for user model
-        required: true
+        required: false,
     },
     createdAt: {
         type: Date,
