@@ -1,5 +1,7 @@
 const User = require('../models/UserModel');
 const bcrypt = require('bcrypt');
+const crypto = require("crypto");
+const nodemailer = require("nodemailer");
 
 
 //create user
@@ -19,14 +21,31 @@ const createUser = async(req , res)=>{
         name,
         login,
         password: hashedPassword,
-        role
+        role,
+        isActive: false        
         });
+
+        //generate activation token
+        const activationToken = user.createActivationToken();
         //to save user in DB 
         await user.save();
 
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
+        });
+        
+        const url = `http://localhost:${process.env.PORT}/api/auth/activate/${activationToken}`;
+            await transporter.sendMail({
+              from: process.env.EMAIL_USER,
+              to: login,
+              subject: 'Activate your account',
+              html: `<h3>Hello ${name}</h3><a href='${url}'>Activate</a>`
+        });
+
         res.status(201).json({
             //ken t3adet s7i7a
-            message: "User has been created successfully!",
+            message: "User has been created successfully! Activation email send !",
             user:{
                 id: user._id,
                 name: user.name,
