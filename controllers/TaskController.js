@@ -232,4 +232,32 @@ const deleteTask = async (req,res) => {
         res.status(500).json({message: error.message});
     }
 }
-module.exports = { getTasksByProject , createTask, UpdateTask, deleteTask};
+
+const GetTaskById = async (req,res) => {
+    try{
+        const { id } = req.params;
+
+        //nlawjou 3ala task
+        const task = await Tache.findById(id)
+            .populate('projetAssocie', 'ProjectName description proprietaire statut ')
+            .populate('utilisateurAssigné','name email role');
+
+        if (!task){
+            return res.status(404).json({message: "Task not found"});
+        }
+        //nthabtou ml permission ynjmou ken l user eli 3ml l project wl manager wl user assigné ychoufou task details
+        const project = await Project.findById(task.projetAssocie._id);
+        if(
+            req.user.role !== "manager" && project.proprietaire.toString() !== req.user.id &&
+            (!task.utilisateurAssigné || task.utilisateurAssigné._id.toString() !== req.user.id)){
+                return res.status(403).json({message: "Access denied : you cannot view this task"});
+        }
+        res.status(200).json(task);     
+    }catch(error){
+        if(error.kind === 'ObjectId'){
+            return res.status(400).json({message: "Invalid task ID format"});
+        }
+        res.status(500).json({message: error.message});
+    }
+}
+module.exports = { getTasksByProject , createTask, UpdateTask, deleteTask, GetTaskById};
